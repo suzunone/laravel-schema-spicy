@@ -1,0 +1,8 @@
+#!/bin/sh
+
+dir=$(cd "${0%[/\\]*}" > /dev/null; cd '../../' && pwd)
+
+php artisan schema-spicy:property $*
+php artisan schema-spicy:xml $*
+
+php artisan schema-spicy:command
