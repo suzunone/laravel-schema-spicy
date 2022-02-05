@@ -1,0 +1,1 @@
+# laravel-schema-spicy
