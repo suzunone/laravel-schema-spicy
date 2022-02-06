@@ -27,16 +27,6 @@ class SchemaSpyPropertyCommand extends Command
     protected $description = 'create schema-spicy property';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      *
      * @return void

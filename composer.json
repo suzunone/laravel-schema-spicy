@@ -1,6 +1,6 @@
 {
     "name": "suzunone/laravel-schema-spicy",
-    "description": "Laravel de SchemaSpy",
+    "description": "In a laravel framework project, run Schemaspy by guessing a foreign key.",
     "keywords": [
         "laravel",
         "Schemaspy",
@@ -55,9 +55,8 @@
         "test-regenerate": "phpunit -d --update-snapshots"
     },
     "require": {
-        "php": "^8.0",
+        "php": "^7.4||^8.0",
         "ext-json": "*",
-        "barryvdh/reflection-docblock": "^2.0.6",
         "composer/composer": "^1.10.23 || ^2.1.9",
         "doctrine/dbal": "^2.6 || ^3",
         "illuminate/console": "^8 || ^9",

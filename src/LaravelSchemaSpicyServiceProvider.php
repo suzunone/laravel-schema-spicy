@@ -21,7 +21,7 @@ class LaravelSchemaSpicyServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        $configPath = __DIR__ . '/../config/schema-spicy.php';
+        $configPath = dirname(__DIR__) . '/config/schema-spicy.php';
         if (function_exists('config_path')) {
             $publishPath = config_path('schema-spicy.php');
         } else {
@@ -29,12 +29,6 @@ class LaravelSchemaSpicyServiceProvider extends ServiceProvider
         }
 
         $this->publishes([$configPath => $publishPath], 'config');
-        //Register commands
-        $this->commands([
-            SchemaSpyXMLCommand::class,
-            SchemaSpyPropertyCommand::class,
-            SchemaSpyCommand::class,
-        ]);
     }
 
     /**
@@ -44,7 +38,21 @@ class LaravelSchemaSpicyServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $configPath = __DIR__ . '/../config/schema-spicy.php';
-        $this->mergeConfigFrom($configPath, 'schema-spicy');
+        $configPath = dirname(__DIR__) . '/config/schema-spicy.php';
+
+        // merge default config
+        $this->mergeConfigFrom(
+            $configPath,
+            'schema-spicy'
+        );
+        //Register commands
+        $this->commands([
+            SchemaSpyXMLCommand::class,
+            SchemaSpyPropertyCommand::class,
+            SchemaSpyCommand::class,
+        ]);
     }
 }
+
+
+

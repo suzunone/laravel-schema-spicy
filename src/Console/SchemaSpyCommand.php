@@ -27,16 +27,6 @@ class SchemaSpyCommand extends Command
     protected $description = 'create schemaspy command';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      *
      * @return void

@@ -39,20 +39,11 @@ class SchemaSpyXMLCommand extends Command
     private $xml_template;
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      *
-     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      * @return int
+     * @throws \JsonException
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function handle(Repository $config)
     {
@@ -66,7 +57,7 @@ class SchemaSpyXMLCommand extends Command
             $this->xml_template = file_get_contents($template_path);
         }
 
-        $composer_json = json_decode(file_get_contents(base_path('composer.json')), true);
+        $composer_json = json_decode(file_get_contents(base_path('composer.json')), true, 512, JSON_THROW_ON_ERROR);
         $autoload_psr4 = $composer_json['autoload']['psr-4'];
 
         $model_path = null;
@@ -235,7 +226,7 @@ class SchemaSpyXMLCommand extends Command
             return;
         }
 
-        $relate = $reflectionMethod->getReturnType()?->getName();
+        $relate = optional($reflectionMethod->getReturnType())->getName();
 
         $class_name = $reflectionClass->getName();
 
@@ -294,17 +285,17 @@ class SchemaSpyXMLCommand extends Command
         };
 
         if (is_null($getTable($sxe))) {
-            $sxe->addChild('table')
-                ?->addAttribute('name', $related_table);
+            optional($sxe->addChild('table'))
+                ->addAttribute('name', $related_table);
         }
 
         if (is_null($getColumn($getTable($sxe)))) {
-            $getTable($sxe)?->addChild('column')
+            optional(optional($getTable($sxe))->addChild('column'))
                 ->addAttribute('name', $foreign_key);
         }
 
         if (is_null($getForeignKey($getColumn($getTable($sxe))))) {
-            $node = $getColumn($getTable($sxe))->addChild('foreignKey');
+            $node = optional($getColumn($getTable($sxe)))->addChild('foreignKey');
             $node->addAttribute('table', $parent_table);
             $node->addAttribute('column', $local_key);
         }
