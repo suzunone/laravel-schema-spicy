@@ -41,8 +41,8 @@ class SchemaSpyXMLCommand extends Command
     /**
      * Execute the console command.
      *
-     * @throws \JsonException
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @throws \JsonException
      * @return int
      */
     public function handle(Repository $config)
@@ -141,7 +141,7 @@ class SchemaSpyXMLCommand extends Command
         return true;
     }
 
-    public function getRelateByDoc(ReflectionMethod $reflectionMethod)
+    public function getRelateByDoc(ReflectionMethod $reflectionMethod): ?string
     {
         $docComment = $reflectionMethod->getDocComment();
 
@@ -174,9 +174,9 @@ class SchemaSpyXMLCommand extends Command
 
     /**
      * @param \ReflectionMethod $reflectionMethod
-     * @return string
+     * @return null|string
      */
-    public function getRelate(ReflectionMethod $reflectionMethod):string
+    public function getRelate(ReflectionMethod $reflectionMethod): ?string
     {
         $relate = optional($reflectionMethod->getReturnType())->getName();
 
@@ -260,9 +260,9 @@ class SchemaSpyXMLCommand extends Command
             case BelongsTo::class:
             case HasOne::class:
             case HasMany::class:
-            $relationship = $model->{$method}();
+                $relationship = $model->{$method}();
 
-            break;
+                break;
             default:
                 return;
         }
