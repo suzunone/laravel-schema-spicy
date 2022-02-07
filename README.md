@@ -13,8 +13,10 @@ php artisan vendor:publish --provider="Suzunone\LaravelSchemaSpicy\LaravelSchema
 ```
 
 ## schemaspy-6.1.0.jar
-wget https://github.com/schemaspy/schemaspy/releases/download/v6.1.0/schemaspy-6.1.0.jar
 
+```shell
+wget https://github.com/schemaspy/schemaspy/releases/download/v6.1.0/schemaspy-6.1.0.jar
+```
 
 ## get odbc driver
 
