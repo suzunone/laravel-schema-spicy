@@ -19,7 +19,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Suzunone\\LaravelSchemaSpicy\\Tests\\": "tests"
+            "Suzunone\\LaravelSchemaSpicy\\Tests\\": "tests/"
         }
     },
     "authors": [
@@ -63,7 +63,6 @@
         "illuminate/filesystem": "^8 || ^9",
         "illuminate/support": "^8 || ^9",
         "illuminate/database": "^8 || ^9",
-        "nikic/php-parser": "^4.7",
         "ext-simplexml": "*",
         "ext-mbstring": "*"
     },

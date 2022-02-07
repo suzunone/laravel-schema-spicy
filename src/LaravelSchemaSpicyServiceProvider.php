@@ -53,6 +53,3 @@ class LaravelSchemaSpicyServiceProvider extends ServiceProvider
         ]);
     }
 }
-
-
-

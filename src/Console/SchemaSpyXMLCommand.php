@@ -27,7 +27,7 @@ class SchemaSpyXMLCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'schema-spicy:xml';
+    protected $signature = 'schema-spicy:xml {--check-relate}';
 
     /**
      * The console command description.
@@ -41,9 +41,9 @@ class SchemaSpyXMLCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return int
      * @throws \JsonException
      * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     * @return int
      */
     public function handle(Repository $config)
     {
@@ -141,27 +141,53 @@ class SchemaSpyXMLCommand extends Command
         return true;
     }
 
-    /**
-     * @param \ReflectionClass $ref
-     * @return bool|mixed
-     */
-    public function isModelClass(ReflectionClass $ref)
+    public function getRelateByDoc(ReflectionMethod $reflectionMethod)
     {
-        $parent = static function ($ref) use (&$parent) {
-            $ref = $ref->getParentClass();
+        $docComment = $reflectionMethod->getDocComment();
 
-            if ($ref === false) {
-                return false;
-            }
+        if (!mb_eregi('@return +([^ ]*)', $docComment, $annotation)) {
+            return null;
+        }
 
-            if ($ref->getName() === Model::class) {
-                return true;
-            }
+        $annotation[1] = trim($annotation[1]);
+        $annotation[1] = ltrim($annotation[1], '\\');
+        switch ($annotation[1]) {
+            case BelongsTo::class:
+                return BelongsTo::class;
+            case HasOne::class:
+                return HasOne::class;
+            case HasMany::class:
+                return HasMany::class;
+        }
 
-            return $parent($ref);
-        };
+        switch (true) {
+            case strtolower($annotation[1]) === 'belongsto':
+                return BelongsTo::class;
+            case strtolower($annotation[1]) === 'hasone':
+                return HasOne::class;
+            case strtolower($annotation[1]) === 'hasmany':
+                return HasMany::class;
+        }
 
-        return $parent($ref);
+        return $annotation[1];
+    }
+
+    /**
+     * @param \ReflectionMethod $reflectionMethod
+     * @return string
+     */
+    public function getRelate(ReflectionMethod $reflectionMethod):string
+    {
+        $relate = optional($reflectionMethod->getReturnType())->getName();
+
+        switch (true) {
+            case $relate === BelongsTo::class:
+            case $relate === HasOne::class:
+            case $relate === HasMany::class:
+                return $relate;
+        }
+
+        return $this->getRelateByDoc($reflectionMethod) ?? $relate;
     }
 
     /**
@@ -226,40 +252,53 @@ class SchemaSpyXMLCommand extends Command
             return;
         }
 
-        $relate = optional($reflectionMethod->getReturnType())->getName();
+        $relate = $this->getRelate($reflectionMethod);
 
         $class_name = $reflectionClass->getName();
 
-        switch (true) {
-            case $relate === BelongsTo::class:
+        switch ($relate) {
+            case BelongsTo::class:
+            case HasOne::class:
+            case HasMany::class:
+            $relationship = $model->{$method}();
+
+            break;
+            default:
+                return;
+        }
+
+        switch (get_class($relationship)) {
+            case BelongsTo::class:
                 $this->info($class_name . '::' . $method);
-                $relationship = $model->{$method}();
+
+                if ($this->option('check-relate')) {
+                    /** @noinspection PhpUndefinedMethodInspection */
+                    $data = $class_name::first();
+
+                    if (!($data && $data->{$method})) {
+                        $this->error($class_name . '::' . $method . ' is no data');
+                    }
+                }
+
                 $related_table = $model->getTable();
                 $parent_table = $relationship->getRelated()->getTable();
 
                 $foreign_key = $relationship->getForeignKeyName();
                 $local_key = $relationship->getOwnerKeyName();
 
-                /** @noinspection PhpUndefinedMethodInspection */
-                $data = $class_name::first();
-
-                if (!($data && $data->{$method})) {
-                    $this->error($class_name . '::' . $method . ' is no data');
-                }
-
                 break;
-            case $relate === HasOne::class:
-            case $relate === HasMany::class:
+            case HasOne::class:
+            case HasMany::class:
                 $this->info($class_name . '::' . $method);
+                if ($this->option('check-relate')) {
+                    /** @noinspection PhpUndefinedMethodInspection */
+                    $data = $class_name::first();
 
-                /** @noinspection PhpUndefinedMethodInspection */
-                $data = $class_name::first();
-
-                if (!($data && $data->{$method})) {
-                    $this->error($class_name . '::' . $method . ' is no data');
+                    if (!($data && $data->{$method})) {
+                        $this->error($class_name . '::' . $method . ' is no data');
+                    }
                 }
 
-                $relationship = $model->{$method}();
                 $parent_table = $model->getTable();
                 $related_table = $relationship->getRelated()->getTable();
 
